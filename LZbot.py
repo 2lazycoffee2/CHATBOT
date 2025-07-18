@@ -32,21 +32,20 @@ def generate_response(intent) :
     else :
         return "sorry, i cannot understand for the moment..."
 
+def LZbot(input_sentence):
+    processed_sentence = preprocess(input_sentence)
+    intent = recognize_intent(processed_sentence)
+    response = generate_response(intent)
+    return response
+
 #LZnlp = spacy.load('en_core_web_sm')    # Chargement du modèle en anglais pour les premiers tests
 #doc = LZnlp("this is a test")   
 #print([(w.text, w.pos_) for w in doc])  # Print chaque token.
 #doc1 = LZnlp("i love chatbots")
 #print([(w.text, w.pos_) for w in doc1])
 
-
-# Définition des entrées : 
-
-input_sentence = input("entrez votre texte : ")
-processed_sentence = preprocess(input_sentence)
-print(processed_sentence)
-
-intent = recognize_intent(processed_sentence)
-print(intent)
-
-response = generate_response(intent)
-print(response)
+print("WELCOME TO LZBOT, FEEL FREE TO TALK WITH ME !")
+while True :
+    user_sentence = input("enter your sentence : ")
+    bot_response = LZbot(user_sentence)
+    print(bot_response)
