@@ -19,6 +19,18 @@ def preprocess(input_sentence) :
     pos_tags = pos_tag(words)
     return pos_tags
 
+def recognize_intent(tokens):
+    greeting_keywords = ['hello', 'hi', 'hey', 'greetings']
+    tokens = [token.lower() for token, pos in tokens]
+    if any(token in greeting_keywords for token in tokens):
+        return "greeting"
+    return "unknown"
+
+def generate_response(intent) : 
+    if intent == "greeting":
+        return "Hello ! How can i help you ?"
+    else :
+        return "sorry, i cannot understand for the moment..."
 
 #LZnlp = spacy.load('en_core_web_sm')    # Chargement du modèle en anglais pour les premiers tests
 #doc = LZnlp("this is a test")   
@@ -32,3 +44,9 @@ def preprocess(input_sentence) :
 input_sentence = input("entrez votre texte : ")
 processed_sentence = preprocess(input_sentence)
 print(processed_sentence)
+
+intent = recognize_intent(processed_sentence)
+print(intent)
+
+response = generate_response(intent)
+print(response)
