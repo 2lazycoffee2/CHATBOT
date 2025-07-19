@@ -1,5 +1,7 @@
 import spacy
 import nltk
+from flask import Flask, request, jsonify
+
 
 from nltk.tokenize import word_tokenize # "tokenisation" découpage de  phrase en mots
 from nltk.tag import pos_tag            # POS tagging, identifie la grammaire des mots 
@@ -28,7 +30,8 @@ def recognize_intent(tokens):
     help_asking = ['give', 'me', 'help']
     #help_asking_patterns = [["give", "help"], ["need", "help"], ["can", "you", "help"]]
     farewell_keywords = ['by', 'goodbye', 'bye', 'see you soon', 'see ya']
-   
+    doing_asking = ['what', 'are', 'you', 'doing']
+
     injures = ['ugly', 'dumb', 'idiot', 'son of a', 'useless']
     
     tokens = [token.lower() for token, pos in tokens]
@@ -42,6 +45,9 @@ def recognize_intent(tokens):
         return "injures"
     elif any(token in farewell_keywords for token in tokens):
         return "farewell"
+    elif any(token in doing_asking for token in tokens):
+        return "doing"
+        
     return "unknown"
 
 def generate_response(intent) :
@@ -58,7 +64,10 @@ def generate_response(intent) :
         return "please, stay polite."
     elif intent == "farewell":
         return "Bye ! I realy look forward to seing you again."
+    elif intent == "doing":
+        return "I am waiting for your needs "
     else :
+
         return "sorry, i cannot understand for the moment..."
 
 def LZbot(input_sentence):
@@ -73,8 +82,25 @@ def LZbot(input_sentence):
 #doc1 = LZnlp("i love chatbots")
 #print([(w.text, w.pos_) for w in doc1])
 
-print("WELCOME TO LZBOT, FEEL FREE TO TALK WITH ME !")
-while True :
-    user_sentence = input("enter your sentence : ")
-    bot_response = LZbot(user_sentence)
-    print("LZbot :",bot_response)
+
+app = Flask(__name__)
+@app.route('/')
+def home():
+    return "WELCOME TO LZBOT, FEEL FREE TO TALK WITH ME !"
+
+@app.route('/chat', methods = ['POST'])
+def chat():
+    user_input = request.json.get('message')
+    response = LZbot(user_input)
+    return jsonify({'response':response})
+
+    fetch('https//127.0.0.1:5000/chat'),
+
+
+if __name__ == '__main__':
+    app.run(debug = True)
+
+#while True :
+#    user_sentence = input("enter your sentence : ")
+#    bot_response = LZbot(user_sentence)
+#    print("LZbot :",bot_response)
