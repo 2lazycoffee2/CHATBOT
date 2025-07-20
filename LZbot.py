@@ -1,6 +1,6 @@
 import spacy
 import nltk
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 
 from nltk.tokenize import word_tokenize # "tokenisation" découpage de  phrase en mots
@@ -86,7 +86,7 @@ def LZbot(input_sentence):
 app = Flask(__name__)
 @app.route('/')
 def home():
-    return "WELCOME TO LZBOT, FEEL FREE TO TALK WITH ME !"
+    return render_template('index.html')
 
 @app.route('/chat', methods = ['POST'])
 def chat():
@@ -94,7 +94,7 @@ def chat():
     response = LZbot(user_input)
     return jsonify({'response':response})
 
-    fetch('https//127.0.0.1:5000/chat'),
+   # fetch('https//127.0.0.1:5000/chat'),
 
 
 if __name__ == '__main__':
