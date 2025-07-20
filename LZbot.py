@@ -25,29 +25,46 @@ def recognize_intent(tokens):
     """
     fonction d'analyse des paternes côté utilisateur.
     """
-    greeting_keywords = ['hello', 'hi', 'hey', 'greetings']
-    feeling_asking = ['how', 'are', 'you', 'okay', 'feel'] #?, 'how do you feel ?', 'are you okay ?', 'how are you', 'how do you feel', 'are you okay' ]
+    greeting_keywords = ['hello', 'hi', 'hey', 'yo','greetings']
+    
+    feeling_asking = ['how are you', 'okay', 'feel'] #?, 'how do you feel ?', 'are you okay ?', 'how are you', 'how do you feel', 'are you okay' ]
+    
     help_asking = ['give', 'me', 'help']
+    
     #help_asking_patterns = [["give", "help"], ["need", "help"], ["can", "you", "help"]]
+    
     farewell_keywords = ['by', 'goodbye', 'bye', 'see you soon', 'see ya']
-    doing_asking = ['what', 'are', 'you', 'doing']
+    
+    doing_asking = ['what are you doing', 'what\'s new', 'wacho going on', 'what are you going on']
 
     injures = ['ugly', 'dumb', 'idiot', 'son of a', 'useless']
     
+    thanks = ['thank you', 'thanks', 'thanksfull', 'thanks you very much']
+    
     tokens = [token.lower() for token, pos in tokens]
+    sentence = " ".join(tokens)
+    
     if any(token in greeting_keywords for token in tokens):
         return "greeting"
-    elif any(token in feeling_asking for token in tokens):
+    
+    elif any(kw in sentence for kw in feeling_asking):
         return "feeling_asks"
-    elif any(token in help_asking for token in tokens):
-        return "asking_help"
+    
     elif any(token in injures for token in tokens):
         return "injures"
+    
     elif any(token in farewell_keywords for token in tokens):
         return "farewell"
-    elif any(token in doing_asking for token in tokens):
+    
+    elif any(sentences in sentence for sentences in doing_asking):
         return "doing"
-        
+    
+    elif any(token in thanks for token in tokens):
+        return "thanks"    
+    
+    elif any(token in help_asking for token in tokens):
+        return "asking_help"
+    
     return "unknown"
 
 def generate_response(intent) :
@@ -56,16 +73,25 @@ def generate_response(intent) :
     """ 
     if intent == "greeting":
         return "Hello ! How can i help you ?"
+    
     elif intent == "feeling_asks" :
         return "Im feeling good today, tell me how can i help you ?"
+    
     elif intent == "asking_help" :
         return "here is a list of what you can do : \nnothing... "
+    
     elif intent == "injures":
         return "please, stay polite."
+    
     elif intent == "farewell":
         return "Bye ! I realy look forward to seing you again."
+    
     elif intent == "doing":
-        return "I am waiting for your needs "
+        return "I am waiting for your needs."
+    
+    elif intent == "thanks":
+        return "You welcome friend !"
+    
     else :
 
         return "sorry, i cannot understand for the moment..."

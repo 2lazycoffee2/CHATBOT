@@ -5,17 +5,17 @@
     <meta charset="UTF-8">
     <title>LZbot Interface</title>
     <style>
-        body { font-family: Arial; padding: 2rem; background: #f4f4f4; }
-        #chat-box { background: white; padding: 1rem; border-radius: 10px; width: 500px; margin: auto; box-shadow: 0 0 10px #ccc; }
-        #messages { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; }
+        body { font-family: Arial; padding: 2rem; background: #000000; }
+        #chat-box { background: rgb(36, 35, 35); padding: 1rem; border-radius: 10px; width: 500px; margin: auto; box-shadow: 0 0 10px #860dab; }
+        #messages { height: 300px; overflow-y: auto; border: 1px solid #860dab; padding: 1rem; margin-bottom: 1rem; }
         .msg { margin: 0.5rem 0; }
-        .user { font-weight: bold; color: #007bff; }
-        .bot { font-weight: bold; color: #28a745; }
+        .user { font-weight: bold; color: #752296; }
+        .bot { font-weight: bold; color: #df10f1; }
     </style>
 </head>
 <body>
     <div id="chat-box">
-        <h2>LZbot</h2>
+        <center><h2>LZbot</h2></center>
         <div id="messages"></div>
         <input type="text" id="userInput" placeholder="Type your message..." style="width: 80%;">
         <button onclick="sendMessage()">Send</button>
