@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LaZy Chatbot </title>
+    <title>LaZy Chatbot</title>
     <style>
         body {
             font-family: Arial;
@@ -59,7 +59,7 @@
         }
 
         .user-msg {
-            background-color: #1e1e2f;
+            background-color: #27275a;
             color: white;
         }
 
@@ -97,6 +97,43 @@
             max-width: 100%;
             max-height: 100%;
         }
+
+        /* Conteneur input + bouton pour être sur la même ligne */
+        #input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #userInput {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #860dab;
+            background-color: #1e1e2f;
+            color: white;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #1fc519;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #a35cf7; /* violet clair au survol */
+        }
+
+        button:active {
+            background-color: #6c0793; /* violet foncé au clic */
+        }
     </style>
 </head>
 <body>
@@ -109,8 +146,12 @@
         </div>
 
         <div id="messages"></div>
-        <input type="text" id="userInput" placeholder="Type your message..." style="width: 80%;">
-        <button onclick="sendMessage()">Send</button>
+
+        <!-- Ici on met input + bouton dans un flex container -->
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
 
     <script>
@@ -137,11 +178,9 @@
             const wrapper = document.createElement("div");
             const bubble = document.createElement("div");
 
-            // Ajoute classes selon le type de message
             wrapper.classList.add(cls === "user" ? "user-msg-wrapper" : "bot-msg-wrapper");
             bubble.classList.add("msg", `${cls}-msg`);
 
-            // Structure du message
             const nameSpan = `<div class="${cls}-name">${sender}:</div>`;
             const textSpan = `<div>${text}</div>`;
             bubble.innerHTML = nameSpan + textSpan;

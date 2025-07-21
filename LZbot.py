@@ -22,13 +22,13 @@ class LZbot :
 
     def __init__(self):
 
-        self.identity = ["who you are", "who are you", "your name", "are you",     "what is your name", "what’s your name", "who am I talking to", "are you a bot"]
+        self.identity = ["who you are", "who are you", "your name",  "what is your name", "what’s your name", "who am I talking to", "are you a bot"]
         self.date_keywords = ['date']
         self.time_keywords = ['time', 'hour', 'clock']
         self.weather_keywords = ['weather', 'temperature']
 
-        self.greeting_keywords = ['hello', 'hi', 'hey', 'yo','greetings', 'hy']
-        self.feeling_asking = ['how are you', 'okay', 'feel'] #?, 'how do you feel ?', 'are you okay ?', 'how are you', 'how do you feel', 'are you okay' ]
+        self.greeting_keywords = ['hello', 'hi', 'hey','greetings', 'hy']
+        self.feeling_asking = ['how are you', 'okay', 'feel', 'how are'] #?, 'how do you feel ?', 'are you okay ?', 'how are you', 'how do you feel', 'are you okay' ]
         self.help_asking = ['give', 'me', 'help']
         #help_asking_patterns = [["give", "help"], ["need", "help"], ["can", "you", "help"]]
         self.farewell_keywords = ['by', 'goodbye', 'bye', 'see you soon', 'see ya']
@@ -51,12 +51,14 @@ class LZbot :
         text = re.sub(r'[^\w\s]', '', text)                                # suppression de caractères spéciaux
         return text
   
-    def is_similar(self, word1, word2, threshold = 70):
+    def is_similar(self, word1, word2):
         """
         fonction pour répondre malgré
         les erreurs utilisateurs.
         """
-        return fuzz.ratio(word1, word2) >= threshold 
+        len_avg = (len(word1) + len(word2)) / 2
+        dynamic_threshold = 90 if len_avg > 6 else 80
+        return fuzz.ratio(word1, word2) >= dynamic_threshold 
 
     def preprocess(self, input_sentence) :
         """
