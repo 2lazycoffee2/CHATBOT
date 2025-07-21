@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LaZy Chatbot</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 2rem;
+            background: #000000;
+        }
+
+        #chat-box {
+            background: rgb(36, 35, 35);
+            padding: 1rem;
+            border-radius: 10px;
+            width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px #860dab;
+        }
+
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #860dab;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 15px;
+            line-height: 1.4em;
+            word-wrap: break-word;
+        }
+
+        .user-msg-wrapper {
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-msg-wrapper {
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #00bfff;
+        }
+
+        .bot-name {
+            font-weight: bold;
+            color: #df10f1;
+        }
+
+        .user-msg {
+            background-color: #27275a;
+            color: white;
+        }
+
+        .bot-msg {
+            background-color: #3f2746;
+            color: white;
+        }
+
+        /* en-tête de logo */
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        #header h2 {
+            color: #ffffff;
+            margin: 0;
+        }
+
+        #logo-container {
+            width: 63px;
+            height: 60px;
+            border: 2px solid #860dab;
+            border-radius: 5px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
+        }
+
+        #logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Conteneur input + bouton pour être sur la même ligne */
+        #input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #userInput {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #860dab;
+            background-color: #1e1e2f;
+            color: white;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #1fc519;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #a35cf7; /* violet clair au survol */
+        }
+
+        button:active {
+            background-color: #6c0793; /* violet foncé au clic */
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-box">
+        <div id="header">
+            <h2><center>LZbot</center></h2>
+            <div id="logo-container">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="LZbot Logo">
+            </div>
+        </div>
+
+        <div id="messages"></div>
+
+        <!-- Ici on met input + bouton dans un flex container -->
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            addMessage("You", msg, "user");
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            });
+
+            const data = await response.json();
+            addMessage("LZbot", data.response, "bot");
+            input.value = "";
+        }
+
+        function addMessage(sender, text, cls) {
+            const msgDiv = document.getElementById("messages");
+            const wrapper = document.createElement("div");
+            const bubble = document.createElement("div");
+
+            wrapper.classList.add(cls === "user" ? "user-msg-wrapper" : "bot-msg-wrapper");
+            bubble.classList.add("msg", `${cls}-msg`);
+
+            const nameSpan = `<div class="${cls}-name">${sender}:</div>`;
+            const textSpan = `<div>${text}</div>`;
+            bubble.innerHTML = nameSpan + textSpan;
+
+            wrapper.appendChild(bubble);
+            msgDiv.appendChild(wrapper);
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
