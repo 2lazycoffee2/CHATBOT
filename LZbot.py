@@ -1,7 +1,15 @@
 import spacy
 import nltk
-from flask import Flask, request, jsonify, render_template
+import random
 
+import datetime
+
+import unicodedata
+import re
+from rapidfuzz import fuzz
+
+
+from flask import Flask, request, jsonify, render_template
 
 from nltk.tokenize import word_tokenize # "tokenisation" découpage de  phrase en mots
 from nltk.tag import pos_tag            # POS tagging, identifie la grammaire des mots 
@@ -13,15 +21,42 @@ from nltk.tag import pos_tag            # POS tagging, identifie la grammaire de
 class LZbot :
 
     def __init__(self):
+
+        self.identity = ["who you are", "who are you", "your name", "are you",     "what is your name", "what’s your name", "who am I talking to", "are you a bot"]
+        self.date_keywords = ['date']
+        self.time_keywords = ['time', 'hour', 'clock']
+        self.weather_keywords = ['weather', 'temperature']
+
         self.greeting_keywords = ['hello', 'hi', 'hey', 'yo','greetings', 'hy']
         self.feeling_asking = ['how are you', 'okay', 'feel'] #?, 'how do you feel ?', 'are you okay ?', 'how are you', 'how do you feel', 'are you okay' ]
         self.help_asking = ['give', 'me', 'help']
         #help_asking_patterns = [["give", "help"], ["need", "help"], ["can", "you", "help"]]
         self.farewell_keywords = ['by', 'goodbye', 'bye', 'see you soon', 'see ya']
         self.doing_asking = ['what are you doing', 'what\'s new', 'wacho going on', 'what are you going on']
+        self.compliments = ['smart', 'inteligent', 'good bot', 'nice job', 'well done']
         self.injures = ['ugly', 'dumb', 'idiot', 'son of a', 'useless']
-        self.thanks = ['thank you', 'thanks', 'thanksfull', 'thanks you very much']
+        self.thanks = ['thank', 'thanks', 'thanksfull', 'thanks you very much']
 
+
+    def normalize(self, text):
+        """
+        normalisation, simplifie le texte 
+        reçu en minuscule sans accents.
+        """
+        text = text.lower() # minuscule par défaut
+
+        text = unicodedata.normalize('NFD', text)                           # décompose les accents
+        text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')  # suppression des accents
+
+        text = re.sub(r'[^\w\s]', '', text)                                # suppression de caractères spéciaux
+        return text
+  
+    def is_similar(self, word1, word2, threshold = 70):
+        """
+        fonction pour répondre malgré
+        les erreurs utilisateurs.
+        """
+        return fuzz.ratio(word1, word2) >= threshold 
 
     def preprocess(self, input_sentence) :
         """
@@ -29,7 +64,7 @@ class LZbot :
         sa classe grammaticale et, retourne une liste 
         de mot, et tag.
         """
-        words = word_tokenize(input_sentence)
+        words = word_tokenize(self.normalize(input_sentence))
         pos_tags = pos_tag(words)
         return pos_tags
 
@@ -41,46 +76,71 @@ class LZbot :
         tokens = [token.lower() for token, pos in tokens]
         sentence = " ".join(tokens)
 
-        if any(token in self.greeting_keywords for token in tokens):
+        if any(self.is_similar(token, kw) for token in tokens for kw in self.thanks):
+                    return "thanks"
+        elif any(self.is_similar(kw, sentence)for kw in self.identity):
+            return "identity"
+        
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.compliments):
+            return "compliments"
+        
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.greeting_keywords):
             return "greeting"
 
-        elif any(kw in sentence for kw in self.feeling_asking):
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.date_keywords):
+            return "get_date"
+
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.time_keywords):
+            return "get_time"
+
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.weather_keywords):
+            return "get_weather"
+
+        elif any(self.is_similar(kw, sentence) for kw in self.feeling_asking):
             return "feeling_asks"
 
-        elif any(token in self.injures for token in tokens):
+        elif any(self.is_similar(token, inj) for token in tokens for inj in self.injures):
             return "injures"
 
-        elif any(token in self.farewell_keywords for token in tokens):
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.farewell_keywords):
             return "farewell"
 
-        elif any(sentences in sentence for sentences in self.doing_asking):
+        elif any(self.is_similar(phrase, sentence) for phrase in self.doing_asking):
             return "doing"
 
-        elif any(token in self.thanks for token in tokens):
-            return "thanks"    
-
-        elif any(token in self.help_asking for token in tokens):
+        elif any(self.is_similar(token, kw) for token in tokens for kw in self.help_asking):
             return "asking_help"
 
         return "unknown"
 
     def generate_response(self, intent) :
         """
-        fonction de génération de réponse.
+        fonction de génération de réponse
+        en fonction de l'entrée utilisateur.
         """ 
         response = {
-            "greeting": "Hello ! How can I help you ?",
-            "feeling_asks": "I'm feeling good today, tell me how can I help you ?",
-            "asking_help": "Here is a list of what you can do :\nNothing...",
-            "injures": "Please, stay polite.",
+            "identity" : ["I am LZbot, made by LazyCoffee, here is his github : https://github.com/2lazycoffee2", "I am a virtual assistant. A simple ChatBot model.", "I am LZbot, happy to help you !" ],
+            "greeting": ["Hello ! How can I help you ?", "Hey Hey, ready to work ?", "Hello, Your assistant is ready !"],
+            "feeling_asks": ["I'm feeling good today, tell me how can I help you ?", "I am fine, thank you. I hope you're good to !", "Everything is fine for me, tell me how can I help you ?"],
+            "asking_help": ["Here is a list of what you can do :\nNothing...", "You asked for some help ! Here is your possibilities : \n"],
+            "injures": ["Please, stay polite.", "Respect, do you know what is it ?", "Hey ! That's not cool.", "Be respectfull please."],
+            "compliments":["I do my work sir !", "Here for you !", "This is just my job"],
             "farewell": "Bye ! I really look forward to seeing you again.",
-            "doing": "I am waiting for your needs.",
-            "thanks": "You're welcome friend !",
-            "unknown": "Sorry, I cannot understand for the moment..."
+            "doing": ["I am waiting for your instructions.", "I'm on the net. Tell me how can I help you ? "],
+            "thanks": ["You're welcome friend !", "No problem !", "You're welcome."],
+            "unknown": ["Sorry, I cannot understand for the moment...",  "I don't get it, please, retry."]
         }
-        return response.get(intent, response["unknown"])
+        if intent == "get_date":
+            return f"Today is {datetime.datetime.now().strftime('%A, %d %B %Y')}."
+        elif intent == "get_time":
+            return f"The current time is {datetime.datetime.now().strftime('%H:%M')}."
+        return random.choice(response.get(intent, response["unknown"]))
 
     def awnser(self, input_sentence):
+        """
+        fonction de réponse. Traite l'entrée
+        et, réponds.
+        """
         processed_sentence = self.preprocess(input_sentence)
         intent = self.recognize_intent(processed_sentence)
         response = self.generate_response(intent)
@@ -97,6 +157,9 @@ app = Flask(__name__)
 bot = LZbot()
 @app.route('/')
 def home():
+    """
+    Renvoie la page index.html
+    """
     return render_template('index.html')
 
 @app.route('/chat', methods = ['POST'])
